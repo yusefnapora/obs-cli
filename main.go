@@ -2,9 +2,12 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 
+	"github.com/BurntSushi/toml"
 	"github.com/andreykaipov/goobs"
 	"github.com/muesli/coral"
 )
@@ -38,7 +41,39 @@ func init() {
 	coral.OnInitialize(connectOBS)
 	rootCmd.PersistentFlags().StringVar(&host, "host", "localhost", "host to connect to")
 	rootCmd.PersistentFlags().StringVar(&password, "password", "", "password for connection")
-	rootCmd.PersistentFlags().Uint32VarP(&port, "port", "p", 4444, "port to connect to")
+	rootCmd.PersistentFlags().Uint32VarP(&port, "port", "p", 4455, "port to connect to")
+
+	if host == "localhost" && password == "" && port == 4455 {
+		type (
+			connection struct {
+				Host     string
+				Port     int
+				Password string
+			}
+
+			config struct {
+				Connection map[string]connection
+			}
+		)
+
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			log.Fatal(err)
+		}
+		f := filepath.Join(homeDir, ".obs_cli", "config.toml")
+
+		if _, err := os.Stat(f); err == nil {
+			var c config
+			_, err := toml.DecodeFile(f, &c.Connection)
+			if err != nil {
+				log.Fatal(err)
+			}
+			conn := c.Connection["connection"]
+			host = conn.Host
+			port = uint32(conn.Port)
+			password = conn.Password
+		}
+	}
 }
 
 func getUserAgent() string {
