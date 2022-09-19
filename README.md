@@ -33,11 +33,22 @@ To install obs-cli, simply run:
 
 ## Usage
 
+Load connection info from toml config. A valid `config.toml` might look like this:
+
+```toml
+[connection]
+Host="localhost"
+Port=4455
+Password="mystrongpass"
+```
+
+It should be placed in `home directory / .obs_cli /`
+
 All commands support the following flags:
 
-- `--host`: which OBS instance to connect to
-- `--port`: port to connect to
-- `--password`: password used for authentication
+-   `--host`: which OBS instance to connect to
+-   `--port`: port to connect to
+-   `--password`: password used for authentication
 
 ### Streams
 
